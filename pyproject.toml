@@ -1,11 +1,15 @@
-[project]
+[tool.poetry]
 name = "newsfeed"
 version = "0.1.0"
 description = "AWS Lambda newsfeed project"
-requires_python = ">=3.12"
-dependencies = []
+package-mode = false
 
-[dependency-groups]
-dev = [
-    "pytest>=8.4.1"
-]
+[tool.poetry.dependencies]
+python = "^3.11"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.4.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
