@@ -1,6 +1,6 @@
 # IAM Role for Lambda
 resource "aws_iam_role" "lambda_role" {
-  name = "newsfeed-lambda-role"
+  name = var.function_name
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -25,16 +25,16 @@ resource "aws_iam_role_policy_attachment" "lambda_policy" {
 # Package the Lambda code
 data "archive_file" "lambda_zip" {
   type        = "zip"
-  source_dir  = "${path.module}/../src/lambdas/"
-  output_path = "${path.module}/lambda.zip"
+  source_dir  = var.source_dir
+  output_path = "${path.module}/${var.function_name}.zip"
 }
 
 # Lambda function
 resource "aws_lambda_function" "main" {
   filename         = data.archive_file.lambda_zip.output_path
-  function_name    = "newsfeed-lambda"
+  function_name    = var.function_name
   role            = aws_iam_role.lambda_role.arn
-  handler         = "lambda.lambda_handler"
+  handler         = var.handler
   runtime         = "python3.11"
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
 }
