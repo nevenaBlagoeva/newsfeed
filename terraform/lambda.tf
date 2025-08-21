@@ -25,7 +25,7 @@ resource "aws_iam_role_policy_attachment" "lambda_policy" {
 # Package the Lambda code
 data "archive_file" "lambda_zip" {
   type        = "zip"
-  source_dir  = "${path.module}/../src"
+  source_dir  = "${path.module}/../src/lambdas/lambda"
   output_path = "${path.module}/lambda.zip"
 }
 
