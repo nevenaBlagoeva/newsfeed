@@ -8,6 +8,7 @@ __pycache__/
 *.tfstate.*
 .terraform/
 terraform/lambda.zip
+terraform/build/
 
 # Environment
 .env
@@ -212,3 +213,4 @@ __marimo__/
 .terraform/
 .terraform.lock.hcl
 terraform/lambda.zip
+terraform/build/

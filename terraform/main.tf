@@ -4,5 +4,10 @@ module "fetcher_lambda" {
   
   function_name = "newsfeed-fetcher"
   source_dir    = "${path.module}/../src/lambdas/fetcher"
-  handler       = "fetcher.lambda_handler"
+  handler       = "fetcher_lambda.lambda_handler"
+  
+  environment_variables = {
+    REDDIT_CLIENT_ID     = var.reddit_client_id
+    REDDIT_CLIENT_SECRET = var.reddit_client_secret
+  }
 }
