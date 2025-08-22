@@ -9,11 +9,14 @@ from news_item import NewsItem
 
 # Initialize DynamoDB client at module level
 dynamodb = boto3.resource('dynamodb')
-table_name = 'RawEvents'
+table_name = os.getenv('DYNAMODB_TABLE_NAME')
 table = dynamodb.Table(table_name) if table_name else None
 
 def lambda_handler(event, context):
     print(f"Processing {len(event['Records'])} SQS messages")
+    
+    if not table:
+        raise ValueError("DYNAMODB_TABLE_NAME environment variable not set")
     
     processed = 0
     skipped = 0
