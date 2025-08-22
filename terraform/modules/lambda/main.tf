@@ -58,8 +58,11 @@ resource "null_resource" "lambda_build" {
         pip install -r requirements.txt -t .
       fi
       
-      # Create ZIP file
-      zip -r "${path.module}/${var.function_name}.zip" . -x "__pycache__/*" "*.pyc"
+      # Create ZIP file - go back to module directory first
+      cd "${path.module}"
+      rm -f "${var.function_name}.zip"
+      cd "build/${var.function_name}"
+      zip -r "../../${var.function_name}.zip" . -x "__pycache__/*" "*.pyc"
     EOF
   }
 }
