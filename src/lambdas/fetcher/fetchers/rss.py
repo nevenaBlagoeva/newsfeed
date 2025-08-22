@@ -34,4 +34,6 @@ class RSSFetcher(BaseFetcher):
         except Exception as e:
             print(f"Error fetching RSS feed: {e}")
             return []
+        
         # TODO: Implement logging or retry mechanism
+        # for better error handling
