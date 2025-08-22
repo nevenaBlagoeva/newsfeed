@@ -86,3 +86,24 @@ resource "aws_iam_role_policy" "ingest_dynamodb_policy" {
     ]
   })
 }
+
+# SQS permissions for ingest lambda (to receive messages)
+resource "aws_iam_role_policy" "ingest_sqs_policy" {
+  name = "ingest-sqs-policy"
+  role = module.ingest_lambda.lambda_role_name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "sqs:ReceiveMessage",
+          "sqs:DeleteMessage",
+          "sqs:GetQueueAttributes"
+        ]
+        Resource = module.ingestion_queue.queue_arn
+      }
+    ]
+  })
+}
