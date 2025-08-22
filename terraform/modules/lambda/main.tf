@@ -74,41 +74,31 @@ resource "null_resource" "lambda_build" {
         echo "No requirements.txt found"
       fi
       
-      echo "Build completed successfully"
-      echo "Build directory contents:"
-      ls -la
+      # Create ZIP file directly
+      echo "Creating ZIP file..."
+      cd "${path.module}/build/${var.function_name}"
+      zip -r "../../${var.function_name}.zip" . -x "__pycache__/*" "*.pyc"
       
-      # Create marker file to indicate build completion
-      touch "${path.module}/build/${var.function_name}/.build_complete"
+      echo "Build and ZIP creation completed successfully"
     EOF
     
     on_failure = fail
   }
 }
 
-# Package the Lambda code - only proceed if build marker exists
-data "archive_file" "lambda_zip" {
-  type        = "zip"
-  source_dir  = "${path.module}/build/${var.function_name}"
-  output_path = "${path.module}/${var.function_name}.zip"
-  excludes    = ["__pycache__", "*.pyc", ".build_complete"]
-  
-  depends_on = [null_resource.lambda_build]
-}
-
 # Lambda function
 resource "aws_lambda_function" "main" {
-  filename         = data.archive_file.lambda_zip.output_path
+  filename         = "${path.module}/${var.function_name}.zip"
   function_name    = var.function_name
   role            = aws_iam_role.lambda_role.arn
   handler         = var.handler
   runtime          = "python3.11"
-  timeout          = 30  # Increase from default 3 seconds
-  source_code_hash = "${data.archive_file.lambda_zip.output_base64sha256}-${local.source_hash}"
+  timeout          = 30
+  source_code_hash = filebase64sha256("${path.module}/${var.function_name}.zip")
 
   environment {
     variables = var.environment_variables
   }
 
-  depends_on = [data.archive_file.lambda_zip]
+  depends_on = [null_resource.lambda_build]
 }
