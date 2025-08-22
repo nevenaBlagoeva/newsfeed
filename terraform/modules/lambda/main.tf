@@ -25,7 +25,12 @@ resource "aws_iam_role_policy_attachment" "lambda_policy" {
 # Track source file changes
 locals {
   source_files = fileset(var.source_dir, "**/*.py")
-  source_hash = md5(join("", [for f in local.source_files : filemd5("${var.source_dir}/${f}")]))
+  shared_dir = "${var.source_dir}/../shared"
+  shared_files = can(fileset(local.shared_dir, "**/*.py")) ? fileset(local.shared_dir, "**/*.py") : []
+  source_hash = md5(join("", concat(
+    [for f in local.source_files : filemd5("${var.source_dir}/${f}")],
+    [for f in local.shared_files : filemd5("${local.shared_dir}/${f}")]
+  )))
 }
 
 # Create build directory and install dependencies

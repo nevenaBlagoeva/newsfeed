@@ -211,3 +211,11 @@ resource "aws_iam_role_policy" "ingest_api_dynamodb_policy" {
     ]
   })
 }
+
+# API Gateway for ingest endpoint
+module "api_gateway" {
+  source = "./modules/api_gateway"
+  
+  ingest_lambda_function_name = module.ingest_api_lambda.lambda_function_name
+  ingest_lambda_invoke_arn    = module.ingest_api_lambda.lambda_invoke_arn
+}

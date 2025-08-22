@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 import hashlib
 
@@ -10,7 +10,7 @@ class NewsItem:
     id: str
     source: str
     title: str
-    url: str
+    url: Optional[str] = ""  # Make sure this change is in the SOURCE file
     body: Optional[str] = ""
     published_at: Optional[str] = None
     ingested_at: Optional[str] = None
@@ -21,17 +21,17 @@ class NewsItem:
     @classmethod
     def from_raw_event(cls, raw_event: dict) -> 'NewsItem':
         """Create NewsItem from raw fetcher event"""
-        now = datetime.now(datetime.timezone.utc).isoformat()
+        now = datetime.now(timezone.utc).isoformat()
         fingerprint = cls._generate_fingerprint(raw_event)
         
         # Calculate TTL (10 days from now)
-        ttl_epoch = int(datetime.utcnow().timestamp()) + (10 * 24 * 60 * 60)
+        ttl_epoch = int(datetime.now(timezone.utc).timestamp()) + (10 * 24 * 60 * 60)
         
         return cls(
             id=fingerprint,  # Use fingerprint as primary key
             source=raw_event['source'],
             title=raw_event['title'],
-            url=raw_event['url'],
+            url=raw_event.get('url', ''),
             body=raw_event.get('body', ''),
             published_at=raw_event.get('published_at', now),
             ingested_at=now,
