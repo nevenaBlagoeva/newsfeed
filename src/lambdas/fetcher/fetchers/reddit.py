@@ -60,6 +60,6 @@ class RedditFetcher(BaseFetcher):
         except Exception as e:
             print(f"Reddit fetch error: {e}")
             return []
-        
+
         # TODO: Implement logging or retry mechanism
         # for better error handling
