@@ -41,7 +41,9 @@ resource "null_resource" "lambda_build" {
       mkdir -p ${path.module}/build/${var.function_name}
       cp -r ${var.source_dir}/* ${path.module}/build/${var.function_name}/
       cd ${path.module}/build/${var.function_name}
-      pip install -r requirements.txt -t .
+      if [ -f requirements.txt ]; then
+        pip install -r requirements.txt -t .
+      fi
     EOF
   }
 }
