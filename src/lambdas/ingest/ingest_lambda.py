@@ -1,11 +1,9 @@
 import json
 import boto3
-import sys
 import os
 
-# Add shared directory to Python path
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'shared'))
-from news_item import NewsItem
+# Import shared NewsItem module
+from shared.news_item import NewsItem
 
 # Initialize DynamoDB client at module level
 dynamodb = boto3.resource('dynamodb')
