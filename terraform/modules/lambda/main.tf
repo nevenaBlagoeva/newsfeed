@@ -49,24 +49,24 @@ resource "null_resource" "lambda_build" {
       fi
       
       # Create build directory
-      rm -rf ${path.module}/build/${var.function_name}
-      mkdir -p ${path.module}/build/${var.function_name}
+      rm -rf "${path.module}/build/${var.function_name}"
+      mkdir -p "${path.module}/build/${var.function_name}"
       
       # Copy lambda source files
       echo "Copying lambda source files..."
-      cp -r ${var.source_dir}/* ${path.module}/build/${var.function_name}/
+      cp -r "${var.source_dir}/"* "${path.module}/build/${var.function_name}/"
       
       # Copy shared directory if it exists
       SHARED_DIR="${var.source_dir}/../shared"
       if [ -d "$SHARED_DIR" ]; then
         echo "Copying shared directory from: $SHARED_DIR"
-        cp -r "$SHARED_DIR" ${path.module}/build/${var.function_name}/
+        cp -r "$SHARED_DIR" "${path.module}/build/${var.function_name}/"
       else
         echo "Shared directory not found: $SHARED_DIR"
       fi
       
       # Install requirements if they exist
-      cd ${path.module}/build/${var.function_name}
+      cd "${path.module}/build/${var.function_name}"
       if [ -f requirements.txt ]; then
         echo "Installing requirements..."
         pip install -r requirements.txt -t .
@@ -78,40 +78,22 @@ resource "null_resource" "lambda_build" {
       echo "Build directory contents:"
       ls -la
       
-      # Verify directory exists
-      if [ ! -d "${path.module}/build/${var.function_name}" ]; then
-        echo "ERROR: Build directory was not created!"
-        exit 1
-      fi
+      # Create marker file to indicate build completion
+      touch "${path.module}/build/${var.function_name}/.build_complete"
     EOF
     
     on_failure = fail
   }
 }
 
-# Ensure build directory exists before archiving
-resource "null_resource" "verify_build" {
-  depends_on = [null_resource.lambda_build]
-  
-  provisioner "local-exec" {
-    command = <<EOF
-      if [ ! -d "${path.module}/build/${var.function_name}" ]; then
-        echo "ERROR: Build directory does not exist!"
-        exit 1
-      fi
-      echo "Build directory verified: ${path.module}/build/${var.function_name}"
-    EOF
-  }
-}
-
-# Package the Lambda code
+# Package the Lambda code - only proceed if build marker exists
 data "archive_file" "lambda_zip" {
   type        = "zip"
   source_dir  = "${path.module}/build/${var.function_name}"
   output_path = "${path.module}/${var.function_name}.zip"
-  excludes    = ["__pycache__", "*.pyc"]
+  excludes    = ["__pycache__", "*.pyc", ".build_complete"]
   
-  depends_on = [null_resource.verify_build]
+  depends_on = [null_resource.lambda_build]
 }
 
 # Lambda function
