@@ -42,6 +42,14 @@ resource "null_resource" "lambda_build" {
       rm -rf ${path.module}/build/${var.function_name}
       mkdir -p ${path.module}/build/${var.function_name}
       cp -r ${var.source_dir}/* ${path.module}/build/${var.function_name}/
+      
+      # Copy shared directory if it exists
+      SHARED_DIR="${var.source_dir}/../shared"
+      if [ -d "$SHARED_DIR" ]; then
+        echo "Copying shared directory..."
+        cp -r "$SHARED_DIR" ${path.module}/build/${var.function_name}/
+      fi
+      
       cd ${path.module}/build/${var.function_name}
       if [ -f requirements.txt ]; then
         echo "Installing requirements..."
