@@ -178,3 +178,36 @@ resource "aws_iam_role_policy" "filter_stream_policy" {
     ]
   })
 }
+
+# Ingest API Lambda (accepts JSON arrays via API Gateway)
+module "ingest_api_lambda" {
+  source = "./modules/lambda"
+  
+  function_name = "newsfeed-ingest-api"
+  source_dir    = "${path.module}/../src/lambdas/ingest_api"
+  handler       = "ingest_api_lambda.lambda_handler"
+  
+  environment_variables = {
+    DYNAMODB_TABLE_NAME = module.raw_events_table.table_name
+  }
+}
+
+# DynamoDB permissions for ingest API lambda
+resource "aws_iam_role_policy" "ingest_api_dynamodb_policy" {
+  name = "ingest-api-dynamodb-policy"
+  role = module.ingest_api_lambda.lambda_role_name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "dynamodb:PutItem",
+          "dynamodb:GetItem"
+        ]
+        Resource = module.raw_events_table.table_arn
+      }
+    ]
+  })
+}
