@@ -38,51 +38,29 @@ resource "null_resource" "lambda_build" {
   provisioner "local-exec" {
     command = <<EOF
       set -e
-      echo "=== Building Lambda function: ${var.function_name} ==="
-      echo "Source directory: ${var.source_dir}"
-      echo "Build directory: ${path.module}/build/${var.function_name}"
-      
-      # Check if source directory exists
-      if [ ! -d "${var.source_dir}" ]; then
-        echo "ERROR: Source directory does not exist: ${var.source_dir}"
-        exit 1
-      fi
       
       # Create build directory
       rm -rf "${path.module}/build/${var.function_name}"
       mkdir -p "${path.module}/build/${var.function_name}"
       
       # Copy lambda source files
-      echo "Copying lambda source files..."
       cp -r "${var.source_dir}/"* "${path.module}/build/${var.function_name}/"
       
       # Copy shared directory if it exists
       SHARED_DIR="${var.source_dir}/../shared"
       if [ -d "$SHARED_DIR" ]; then
-        echo "Copying shared directory from: $SHARED_DIR"
         cp -r "$SHARED_DIR" "${path.module}/build/${var.function_name}/"
-      else
-        echo "Shared directory not found: $SHARED_DIR"
       fi
       
       # Install requirements if they exist
       cd "${path.module}/build/${var.function_name}"
       if [ -f requirements.txt ]; then
-        echo "Installing requirements..."
         pip install -r requirements.txt -t .
-      else
-        echo "No requirements.txt found"
       fi
       
-      # Create ZIP file directly
-      echo "Creating ZIP file..."
-      cd "${path.module}/build/${var.function_name}"
-      zip -r "../../${var.function_name}.zip" . -x "__pycache__/*" "*.pyc"
-      
-      echo "Build and ZIP creation completed successfully"
+      # Create ZIP file
+      zip -r "${path.module}/${var.function_name}.zip" . -x "__pycache__/*" "*.pyc"
     EOF
-    
-    on_failure = fail
   }
 }
 
