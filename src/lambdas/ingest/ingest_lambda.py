@@ -1,6 +1,7 @@
 import json
 import boto3
 import os
+from typing import Dict, Any, Optional
 
 # Import shared NewsItem module
 from shared.news_item import NewsItem
@@ -10,7 +11,7 @@ dynamodb = boto3.resource('dynamodb')
 table_name = os.getenv('DYNAMODB_TABLE_NAME')
 table = dynamodb.Table(table_name) if table_name else None
 
-def lambda_handler(event, context):
+def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, int]:
     print(f"Processing {len(event['Records'])} SQS messages")
     
     if not table:
@@ -50,7 +51,7 @@ def lambda_handler(event, context):
     print(f"Completed: processed {processed}, skipped {skipped}")
     return {"processed": processed, "skipped": skipped}
 
-def _event_exists(fingerprint):
+def _event_exists(fingerprint: str) -> bool:
     """Check if event already exists in DynamoDB"""
     try:
         response = table.get_item(

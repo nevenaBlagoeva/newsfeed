@@ -20,3 +20,15 @@ variable "ttl_enabled" {
   type        = bool
   default     = true
 }
+
+variable "range_key" {
+  description = "Range key for the DynamoDB table"
+  type        = string
+  default     = null
+}
+
+variable "range_key_type" {
+  description = "Type of the range key (S, N, B)"
+  type        = string
+  default     = "N"
+}

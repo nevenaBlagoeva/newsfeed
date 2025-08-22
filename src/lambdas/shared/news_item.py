@@ -21,7 +21,7 @@ class NewsItem:
     @classmethod
     def from_raw_event(cls, raw_event: dict) -> 'NewsItem':
         """Create NewsItem from raw fetcher event"""
-        now = datetime.utcnow().isoformat()
+        now = datetime.now(datetime.timezone.utc).isoformat()
         fingerprint = cls._generate_fingerprint(raw_event)
         
         # Calculate TTL (10 days from now)

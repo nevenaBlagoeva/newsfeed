@@ -2,11 +2,12 @@ from sources.config import SOURCES
 import json
 import boto3
 import os
+from typing import Dict, Any
 
 # Initialize SQS client at module level
 sqs = boto3.client('sqs')
 
-def lambda_handler(event, context):
+def lambda_handler(event: Dict[str, Any], context: Any) -> None:
     print(f"Starting fetcher lambda with {len(SOURCES)} sources")
     
     # Get queue URL from environment variable
