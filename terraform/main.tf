@@ -212,10 +212,44 @@ resource "aws_iam_role_policy" "ingest_api_dynamodb_policy" {
   })
 }
 
-# API Gateway for ingest endpoint
+# Retrieve Lambda (GET /retrieve endpoint)
+module "retrieve_api_lambda" {
+  source = "./modules/lambda"
+  
+  function_name = "newsfeed-retrieve"
+  source_dir    = "${path.module}/../src/lambdas/retrieve"
+  handler       = "retrieve_lambda.lambda_handler"
+  
+  environment_variables = {
+    FILTERED_TABLE_NAME = module.filtered_events_table.table_name
+  }
+}
+
+# DynamoDB permissions for retrieve lambda
+resource "aws_iam_role_policy" "retrieve_dynamodb_policy" {
+  name = "retrieve-dynamodb-policy"
+  role = module.retrieve_api_lambda.lambda_role_name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "dynamodb:Query"
+        ]
+        Resource = module.filtered_events_table.table_arn
+      }
+    ]
+  })
+}
+
+# API Gateway for ingest and retrieve endpoints
 module "api_gateway" {
   source = "./modules/api_gateway"
-  
+
   ingest_lambda_function_name = module.ingest_api_lambda.lambda_function_name
   ingest_lambda_invoke_arn    = module.ingest_api_lambda.lambda_invoke_arn
+  retrieve_lambda_function_name = module.retrieve_api_lambda.lambda_function_name
+  retrieve_lambda_invoke_arn    = module.retrieve_api_lambda.lambda_invoke_arn
 }
