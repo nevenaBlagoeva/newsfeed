@@ -32,18 +32,38 @@ locals {
 resource "null_resource" "lambda_build" {
   triggers = {
     source_hash = local.source_hash
-    requirements = filemd5("${var.source_dir}/requirements.txt")
+    requirements = try(filemd5("${var.source_dir}/requirements.txt"), "")
   }
   
   provisioner "local-exec" {
     command = <<EOF
+      set -e
+      echo "Building Lambda function: ${var.function_name}"
       rm -rf ${path.module}/build/${var.function_name}
       mkdir -p ${path.module}/build/${var.function_name}
       cp -r ${var.source_dir}/* ${path.module}/build/${var.function_name}/
       cd ${path.module}/build/${var.function_name}
       if [ -f requirements.txt ]; then
+        echo "Installing requirements..."
         pip install -r requirements.txt -t .
       fi
+      echo "Build completed successfully"
+      ls -la
+    EOF
+  }
+}
+
+# Ensure build directory exists before archiving
+resource "null_resource" "verify_build" {
+  depends_on = [null_resource.lambda_build]
+  
+  provisioner "local-exec" {
+    command = <<EOF
+      if [ ! -d "${path.module}/build/${var.function_name}" ]; then
+        echo "ERROR: Build directory does not exist!"
+        exit 1
+      fi
+      echo "Build directory verified: ${path.module}/build/${var.function_name}"
     EOF
   }
 }
@@ -55,7 +75,7 @@ data "archive_file" "lambda_zip" {
   output_path = "${path.module}/${var.function_name}.zip"
   excludes    = ["__pycache__", "*.pyc"]
   
-  depends_on = [null_resource.lambda_build]
+  depends_on = [null_resource.verify_build]
 }
 
 # Lambda function
