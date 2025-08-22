@@ -44,11 +44,11 @@ resource "null_resource" "lambda_build" {
       rm -rf "build/${var.function_name}"
       mkdir -p "build/${var.function_name}"
       
-      # Copy lambda source files
-      cp -r "${var.source_dir}/"* "build/${var.function_name}/"
+      # Copy lambda source files - use absolute path
+      cp -r "${abspath(var.source_dir)}"/* "build/${var.function_name}/"
       
-      # Copy shared directory if it exists
-      SHARED_DIR="${var.source_dir}/../shared"
+      # Copy shared directory if it exists - use absolute path
+      SHARED_DIR="${abspath(var.source_dir)}/../shared"
       if [ -d "$SHARED_DIR" ]; then
         cp -r "$SHARED_DIR" "build/${var.function_name}/"
       fi
