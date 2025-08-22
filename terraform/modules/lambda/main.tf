@@ -36,31 +36,32 @@ resource "null_resource" "lambda_build" {
   }
   
   provisioner "local-exec" {
+    working_dir = path.module
     command = <<EOF
       set -e
       
       # Create build directory
-      rm -rf "${path.module}/build/${var.function_name}"
-      mkdir -p "${path.module}/build/${var.function_name}"
+      rm -rf "build/${var.function_name}"
+      mkdir -p "build/${var.function_name}"
       
       # Copy lambda source files
-      cp -r "${var.source_dir}/"* "${path.module}/build/${var.function_name}/"
+      cp -r "${var.source_dir}/"* "build/${var.function_name}/"
       
       # Copy shared directory if it exists
       SHARED_DIR="${var.source_dir}/../shared"
       if [ -d "$SHARED_DIR" ]; then
-        cp -r "$SHARED_DIR" "${path.module}/build/${var.function_name}/"
+        cp -r "$SHARED_DIR" "build/${var.function_name}/"
       fi
       
       # Install requirements if they exist
-      cd "${path.module}/build/${var.function_name}"
+      cd "build/${var.function_name}"
       if [ -f requirements.txt ]; then
         pip install -r requirements.txt -t .
       fi
       
-      # Create ZIP file using absolute paths
-      rm -f "${path.module}/${var.function_name}.zip"
-      zip -r "${path.module}/${var.function_name}.zip" . -x "__pycache__/*" "*.pyc"
+      # Create ZIP file
+      rm -f "../../${var.function_name}.zip"
+      zip -r "../../${var.function_name}.zip" . -x "__pycache__/*" "*.pyc"
     EOF
   }
 }
