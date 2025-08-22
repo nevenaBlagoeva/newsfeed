@@ -3,15 +3,18 @@ import json
 import boto3
 import os
 
-# Initialize SQS client and queue URL at module level
+# Initialize SQS client at module level
 sqs = boto3.client('sqs')
-queue_url = os.getenv('SQS_QUEUE_URL')
 
 def lambda_handler(event, context):
     print(f"Starting fetcher lambda with {len(SOURCES)} sources")
     
-    if not queue_url:
-        raise ValueError("SQS_QUEUE_URL environment variable not set")
+    # Get queue URL by name
+    try:
+        queue_url = sqs.get_queue_url(QueueName='newsfeed-ingestion-queue')['QueueUrl']
+    except Exception as e:
+        print(f"Failed to get queue URL: {str(e)}")
+        raise
     
     all_events = []
     
