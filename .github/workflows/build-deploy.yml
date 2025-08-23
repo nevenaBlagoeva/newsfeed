@@ -51,7 +51,7 @@ jobs:
           cd src/lambdas/${{ matrix.lambda }}
 
           # Copy shared directory to lambda directory
-          cp -r ../shared ./ || echo "No shared directory found"
+          cp -r $GITHUB_WORKSPACE/src/shared ./shared
 
           # Install requirements if they exist
           if [ -f requirements.txt ]; then
