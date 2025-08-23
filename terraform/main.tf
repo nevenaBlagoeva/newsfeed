@@ -191,7 +191,7 @@ resource "aws_iam_role_policy" "filter_stream_policy" {
 module "ingest_api_lambda" {
   source = "./modules/lambda"
   
-  function_name = "newsfeed-ingest-api"
+  function_name = "newsfeed-ingest_api"
   handler       = "ingest_api_lambda.lambda_handler"
 
   environment_variables = {
