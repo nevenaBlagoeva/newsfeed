@@ -54,7 +54,7 @@ jobs:
 
       - name: Upload artifact to S3
         run: |
-          aws s3 cp ../../${{ matrix.lambda }}.zip \
+          aws s3 cp $GITHUB_WORKSPACE/src/${{ matrix.lambda }}.zip \
             s3://$ARTIFACT_BUCKET/${{ matrix.lambda }}-${{ github.sha }}.zip
 
   deploy:
