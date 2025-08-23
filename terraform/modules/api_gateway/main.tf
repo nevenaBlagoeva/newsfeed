@@ -53,7 +53,7 @@ resource "aws_api_gateway_integration" "retrieve_integration" {
 
   integration_http_method = "POST"
   type                   = "AWS_PROXY"
-  uri                    = var.retrieve_lambda_invoke_arn
+  uri                    = var.retrieve_api_lambda_invoke_arn
 }
 
 # API Gateway deployment
@@ -64,6 +64,29 @@ resource "aws_api_gateway_deployment" "main" {
   ]
 
   rest_api_id = aws_api_gateway_rest_api.main.id
+
+  # Force new deployment when anything changes
+  triggers = {
+    redeployment = sha1(jsonencode([
+      aws_api_gateway_resource.ingest.id,
+      aws_api_gateway_resource.retrieve.id,
+      aws_api_gateway_method.ingest_post.id,
+      aws_api_gateway_method.retrieve_get.id,
+      aws_api_gateway_integration.ingest_integration.id,
+      aws_api_gateway_integration.retrieve_integration.id,
+    ]))
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+# API Gateway stage
+resource "aws_api_gateway_stage" "dev" {
+  deployment_id = aws_api_gateway_deployment.main.id
+  rest_api_id   = aws_api_gateway_rest_api.main.id
+  stage_name    = "dev"
 }
 
 # Lambda permission for API Gateway
@@ -79,7 +102,7 @@ resource "aws_lambda_permission" "api_gateway" {
 resource "aws_lambda_permission" "retrieve_api_gateway" {
   statement_id  = "AllowRetrieveAPIGatewayInvoke"
   action        = "lambda:InvokeFunction"
-  function_name = var.retrieve_lambda_function_name
+  function_name = var.retrieve_api_lambda_function_name
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_api_gateway_rest_api.main.execution_arn}/*/*"
 }

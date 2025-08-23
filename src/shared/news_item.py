@@ -10,7 +10,7 @@ class NewsItem:
     id: str
     source: str
     title: str
-    url: Optional[str] = ""  # Make sure this change is in the SOURCE file
+    url: Optional[str] = ""
     body: Optional[str] = ""
     published_at: Optional[str] = None
     ingested_at: Optional[str] = None
@@ -31,7 +31,7 @@ class NewsItem:
             id=fingerprint,  # Use fingerprint as primary key
             source=raw_event['source'],
             title=raw_event['title'],
-            url=raw_event.get('url', ''),
+            url=raw_event.get('url', ''),  # Make sure URL is preserved
             body=raw_event.get('body', ''),
             published_at=raw_event.get('published_at', now),
             ingested_at=now,

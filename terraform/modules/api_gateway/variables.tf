@@ -8,12 +8,12 @@ variable "ingest_lambda_invoke_arn" {
   type        = string
 }
 
-variable "retrieve_lambda_function_name" {
-  description = "Name of the retrieve Lambda function"
+variable "retrieve_api_lambda_function_name" {
+  description = "Name of the retrieve API Lambda function"
   type        = string
 }
 
-variable "retrieve_lambda_invoke_arn" {
-  description = "Invoke ARN of the retrieve Lambda function"
+variable "retrieve_api_lambda_invoke_arn" {
+  description = "Invoke ARN of the retrieve API Lambda function"
   type        = string
 }
