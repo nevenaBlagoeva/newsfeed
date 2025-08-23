@@ -64,7 +64,7 @@ jobs:
       - name: Upload artifact to S3
         run: |
           aws s3 cp ./newsfeed-${{ matrix.lambda }}.zip \
-            s3://$ARTIFACT_BUCKET/newsfeed-${{ matrix.lambda }}-${{ github.sha }}.zip
+            s3://$ARTIFACT_BUCKET/newsfeed-${{ matrix.lambda }}.zip
 
   deploy:
     runs-on: ubuntu-latest
@@ -87,4 +87,3 @@ jobs:
           AWS_DEFAULT_REGION: eu-west-1
           TF_VAR_reddit_client_id: ${{ secrets.REDDIT_CLIENT_ID }}
           TF_VAR_reddit_client_secret: ${{ secrets.REDDIT_CLIENT_SECRET }}
-          TF_VAR_commit_sha: ${{ github.sha }}
