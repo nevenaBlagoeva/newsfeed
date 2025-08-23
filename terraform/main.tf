@@ -27,6 +27,16 @@ module "fetcher_lambda" {
   }
 }
 
+# EventBridge rule to trigger fetcher lambda
+module "fetcher_schedule" {
+  source = "./modules/eventbridge"
+  rule_name           = "newsfeed-hourly-fetch"
+  description         = "Trigger news fetcher every hour"
+  schedule_expression = "rate(1 hour)"
+  lambda_function_arn = module.fetcher_lambda.lambda_function_arn
+  lambda_function_name = module.fetcher_lambda.lambda_function_name
+}
+
 # Add SQS permissions to fetcher lambda
 resource "aws_iam_role_policy" "fetcher_sqs_policy" {
   name = "fetcher-sqs-policy"
