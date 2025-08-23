@@ -24,7 +24,7 @@ class NewsItem:
         now = datetime.now(timezone.utc).isoformat()
         fingerprint = cls._generate_fingerprint(raw_event)
         
-        # Calculate TTL (10 days from now)
+        # Calculate TTL (10 days from now).
         ttl_epoch = int(datetime.now(timezone.utc).timestamp()) + (10 * 24 * 60 * 60)
         
         return cls(

@@ -1,9 +1,7 @@
 import json
 import boto3
 import os
-from typing import Dict, Any, Optional
-
-# Import shared NewsItem module
+from typing import Dict, Any
 from shared.news_item import NewsItem
 
 # Initialize DynamoDB client at module level

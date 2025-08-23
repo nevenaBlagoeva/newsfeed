@@ -15,3 +15,9 @@ variable "reddit_client_secret" {
   type        = string
   sensitive   = true
 }
+
+variable "commit_sha" {
+  description = "Git commit SHA for deployment tracking"
+  type        = string
+  default     = "unknown"
+}

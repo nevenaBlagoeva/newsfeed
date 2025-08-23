@@ -17,14 +17,15 @@ module "fetcher_lambda" {
   source = "./modules/lambda"
   
   function_name = "newsfeed-fetcher"
-  source_dir    = "${path.module}/../src/lambdas/fetcher"
   handler       = "fetcher_lambda.lambda_handler"
-  
+  commit_sha    = var.commit_sha
+
   environment_variables = {
     REDDIT_CLIENT_ID     = var.reddit_client_id
     REDDIT_CLIENT_SECRET = var.reddit_client_secret
     SQS_QUEUE_URL        = module.ingestion_queue.queue_url
   }
+
 }
 
 # EventBridge rule to trigger fetcher lambda
@@ -62,9 +63,9 @@ module "ingest_lambda" {
   source = "./modules/lambda"
   
   function_name = "newsfeed-ingest"
-  source_dir    = "${path.module}/../src/lambdas/ingest"
   handler       = "ingest_lambda.lambda_handler"
-  
+  commit_sha    = var.commit_sha
+
   environment_variables = {
     DYNAMODB_TABLE_NAME = module.raw_events_table.table_name
   }
@@ -133,8 +134,8 @@ module "filter_lambda" {
   source = "./modules/lambda"
   
   function_name = "newsfeed-filter"
-  source_dir    = "${path.module}/../src/lambdas/filter"
   handler       = "filter_lambda.lambda_handler"
+  commit_sha    = var.commit_sha
   
   environment_variables = {
     FILTERED_TABLE_NAME = module.filtered_events_table.table_name
@@ -194,9 +195,9 @@ module "ingest_api_lambda" {
   source = "./modules/lambda"
   
   function_name = "newsfeed-ingest-api"
-  source_dir    = "${path.module}/../src/lambdas/ingest_api"
   handler       = "ingest_api_lambda.lambda_handler"
-  
+  commit_sha    = var.commit_sha
+
   environment_variables = {
     DYNAMODB_TABLE_NAME = module.raw_events_table.table_name
   }
@@ -227,8 +228,8 @@ module "retrieve_lambda" {
   source = "./modules/lambda"
   
   function_name = "newsfeed-retrieve"
-  source_dir    = "${path.module}/../src/lambdas/retrieve"
   handler       = "retrieve_lambda.lambda_handler"  # This should match the actual file name
+  commit_sha    = var.commit_sha
   
   environment_variables = {
     FILTERED_TABLE_NAME = module.filtered_events_table.table_name
@@ -259,9 +260,9 @@ module "api_gateway" {
   source = "./modules/api_gateway"
   
   ingest_lambda_function_name = module.ingest_api_lambda.lambda_function_name
-  ingest_lambda_function_arn    = module.ingest_api_lambda.lambda_function_arn
+  ingest_lambda_invoke_arn    = module.ingest_api_lambda.lambda_function_arn
   retrieve_api_lambda_function_name = module.retrieve_lambda.lambda_function_name
-  retrieve_api_lambda_function_arn    = module.retrieve_lambda.lambda_function_arn
+  retrieve_api_lambda_invoke_arn    = module.retrieve_lambda.lambda_function_arn
 }
 
 # Output the actual API URLs for debugging

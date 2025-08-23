@@ -3,11 +3,6 @@ variable "function_name" {
   type        = string
 }
 
-variable "source_dir" {
-  description = "Directory containing Lambda source code"
-  type        = string
-}
-
 variable "handler" {
   description = "Lambda function handler"
   type        = string
@@ -18,4 +13,9 @@ variable "environment_variables" {
   description = "Environment variables for the Lambda function"
   type        = map(string)
   default     = {}
+}
+
+variable "commit_sha" {
+  description = "The commit SHA from GHA"
+  type        = string
 }
