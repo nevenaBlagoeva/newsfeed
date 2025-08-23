@@ -50,11 +50,11 @@ jobs:
         run: |
           cd src/lambdas/${{ matrix.lambda }}
           pip install -r requirements.txt -t .
-          zip -r ../../${{ matrix.lambda }}.zip .
+          zip -r ../../newsfeed-${{ matrix.lambda }}.zip .
 
       - name: Upload artifact to S3
         run: |
-          aws s3 cp $GITHUB_WORKSPACE/src/${{ matrix.lambda }}.zip \
+          aws s3 cp $GITHUB_WORKSPACE/src/newsfeed-${{ matrix.lambda }}.zip \
             s3://$ARTIFACT_BUCKET/${{ matrix.lambda }}-${{ github.sha }}.zip
 
   deploy:
