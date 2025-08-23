@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        lambda: [fetcher, filter, ingest, ingest_api, retrieve]
+        lambda: [fetcher, filter, ingest, ingest-api, retrieve]
 
     steps:
       - uses: actions/checkout@v4
