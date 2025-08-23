@@ -18,7 +18,6 @@ module "fetcher_lambda" {
   
   function_name = "newsfeed-fetcher"
   handler       = "fetcher_lambda.lambda_handler"
-  commit_sha    = var.commit_sha
 
   environment_variables = {
     REDDIT_CLIENT_ID     = var.reddit_client_id
@@ -64,7 +63,6 @@ module "ingest_lambda" {
   
   function_name = "newsfeed-ingest"
   handler       = "ingest_lambda.lambda_handler"
-  commit_sha    = var.commit_sha
 
   environment_variables = {
     DYNAMODB_TABLE_NAME = module.raw_events_table.table_name
@@ -135,7 +133,6 @@ module "filter_lambda" {
   
   function_name = "newsfeed-filter"
   handler       = "filter_lambda.lambda_handler"
-  commit_sha    = var.commit_sha
   
   environment_variables = {
     FILTERED_TABLE_NAME = module.filtered_events_table.table_name
@@ -196,7 +193,6 @@ module "ingest_api_lambda" {
   
   function_name = "newsfeed-ingest-api"
   handler       = "ingest_api_lambda.lambda_handler"
-  commit_sha    = var.commit_sha
 
   environment_variables = {
     DYNAMODB_TABLE_NAME = module.raw_events_table.table_name
@@ -229,7 +225,6 @@ module "retrieve_lambda" {
   
   function_name = "newsfeed-retrieve"
   handler       = "retrieve_lambda.lambda_handler"  # This should match the actual file name
-  commit_sha    = var.commit_sha
   
   environment_variables = {
     FILTERED_TABLE_NAME = module.filtered_events_table.table_name

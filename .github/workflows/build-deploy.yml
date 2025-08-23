@@ -55,7 +55,7 @@ jobs:
       - name: Upload artifact to S3
         run: |
           aws s3 cp $GITHUB_WORKSPACE/src/newsfeed-${{ matrix.lambda }}.zip \
-            s3://$ARTIFACT_BUCKET/newsfeed-${{ matrix.lambda }}-${{ github.sha }}.zip
+            s3://$ARTIFACT_BUCKET/newsfeed-${{ matrix.lambda }}.zip
 
   deploy:
     runs-on: ubuntu-latest
@@ -70,8 +70,7 @@ jobs:
       - name: Terraform Init & Apply
         run: |
           terraform init
-          terraform apply -auto-approve \
-           -var="commit_sha=${{ github.sha }}"
+          terraform apply -auto-approve
 
         working-directory: ./terraform
         env:

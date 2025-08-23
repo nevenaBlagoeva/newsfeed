@@ -27,7 +27,7 @@ resource "aws_lambda_function" "main" {
   function_name    = var.function_name
   role            = aws_iam_role.lambda_role.arn
   s3_bucket       = "newsfeed-lambda-artifacts"
-  s3_key          = "${var.function_name}-${var.commit_sha}.zip"
+  s3_key          = "${var.function_name}.zip"
   handler         = var.handler
   runtime          = "python3.11"
   timeout          = 30

@@ -14,8 +14,3 @@ variable "environment_variables" {
   type        = map(string)
   default     = {}
 }
-
-variable "commit_sha" {
-  description = "The commit SHA from GHA"
-  type        = string
-}
