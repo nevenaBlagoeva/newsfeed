@@ -27,7 +27,7 @@ resource "aws_api_gateway_integration" "ingest_integration" {
 
   integration_http_method = "POST"
   type                   = "AWS_PROXY"
-  uri                    = var.ingest_lambda_invoke_arn
+  uri                    = var.ingest_lambda_function_arn
 }
 
 # API Gateway resource for /retrieve
@@ -53,7 +53,7 @@ resource "aws_api_gateway_integration" "retrieve_integration" {
 
   integration_http_method = "POST"
   type                   = "AWS_PROXY"
-  uri                    = var.retrieve_api_lambda_invoke_arn
+  uri                    = var.retrieve_api_lambda_function_arn
 }
 
 # API Gateway deployment

@@ -259,9 +259,9 @@ module "api_gateway" {
   source = "./modules/api_gateway"
   
   ingest_lambda_function_name = module.ingest_api_lambda.lambda_function_name
-  ingest_lambda_invoke_arn    = module.ingest_api_lambda.lambda_invoke_arn
+  ingest_lambda_function_arn    = module.ingest_api_lambda.lambda_function_arn
   retrieve_api_lambda_function_name = module.retrieve_lambda.lambda_function_name
-  retrieve_api_lambda_invoke_arn    = module.retrieve_lambda.lambda_invoke_arn
+  retrieve_api_lambda_function_arn    = module.retrieve_lambda.lambda_function_arn
 }
 
 # Output the actual API URLs for debugging

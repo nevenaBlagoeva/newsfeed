@@ -3,7 +3,7 @@ variable "ingest_lambda_function_name" {
   type        = string
 }
 
-variable "ingest_lambda_invoke_arn" {
+variable "ingest_lambda_function_arn" {
   description = "Invoke ARN of the Lambda function for ingestion"
   type        = string
 }
@@ -13,7 +13,7 @@ variable "retrieve_api_lambda_function_name" {
   type        = string
 }
 
-variable "retrieve_api_lambda_invoke_arn" {
+variable "retrieve_api_lambda_function_arn" {
   description = "Invoke ARN of the retrieve API Lambda function"
   type        = string
 }
