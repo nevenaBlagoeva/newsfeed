@@ -63,7 +63,7 @@ jobs:
 
       - name: Upload artifact to S3
         run: |
-          aws s3 cp $GITHUB_WORKSPACE/src/newsfeed-${{ matrix.lambda }}.zip \
+          aws s3 cp src/newsfeed-${{ matrix.lambda }}.zip \
             s3://$ARTIFACT_BUCKET/newsfeed-${{ matrix.lambda }}.zip
 
   deploy:
