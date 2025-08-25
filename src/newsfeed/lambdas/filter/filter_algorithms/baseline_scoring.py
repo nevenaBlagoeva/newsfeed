@@ -21,6 +21,7 @@ LOW_PRIORITY_KEYWORDS = {
 PRIORITY_POINTS = {"high": 10, "medium": 6, "low": 3}
 TITLE_MULTIPLIER = 3
 
+
 # --------------------------
 # Recency scoring function
 # --------------------------

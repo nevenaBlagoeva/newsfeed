@@ -1,4 +1,3 @@
-# src/lambdas/retrieve/retrieve_lambda.py
 import json
 import os
 from typing import Dict, Any, List, Optional
