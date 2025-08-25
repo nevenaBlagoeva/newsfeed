@@ -272,7 +272,7 @@ resource "aws_lambda_permission" "ingest_api_gateway_permission" {
   action        = "lambda:InvokeFunction"
   function_name = module.ingest_api_lambda.lambda_function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "${module.api_gateway.api_execution_arn}/*/*"
+  source_arn    = "${module.api_gateway.api_execution_arn}/*/POST/ingest"
 }
 
 # Lambda permissions for API Gateway to invoke retrieve lambda

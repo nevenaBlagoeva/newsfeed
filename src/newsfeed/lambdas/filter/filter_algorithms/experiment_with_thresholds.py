@@ -32,28 +32,32 @@ relevant_events = [
 irrelevant_events = [
     {"id": f"evt-{i:03d}", "source": src, "title": title, "body": body, "published_at": published_at}
     for i, (src, title, body, published_at) in enumerate([
-        ("reddit", "Top 10 gaming laptops for casual users", "A fun roundup of laptops, not relevant for IT managers.", "2025-08-25T09:00:00Z"),
-        ("ars-technica", "New sci-fi movie trailer released", "Movie news, not IT critical.", "2025-08-25T08:45:00Z"),
-        ("toms-hardware", "Top RGB keyboards of 2025", "Cool peripherals, irrelevant to IT management.", "2025-08-25T08:30:00Z"),
-        ("reddit", "Popular video game update released", "Gaming news, not operationally relevant.", "2025-08-25T08:15:00Z"),
-        ("ars-technica", "Celebrity announces tech startup", "Interesting but not IT-critical.", "2025-08-25T08:00:00Z"),
-        ("reddit", "DIY smart home project", "Hobbyist tech, irrelevant to enterprise IT.", "2025-08-25T07:45:00Z"),
-        ("toms-hardware", "Top 5 graphics cards for gamers", "Not relevant to IT operations.", "2025-08-25T07:30:00Z"),
-        ("ars-technica", "New social media trend goes viral", "Not operationally critical.", "2025-08-25T07:15:00Z"),
-        ("reddit", "Latest meme formats shared online", "Fun content only, irrelevant.", "2025-08-25T07:00:00Z"),
-        ("toms-hardware", "Top gaming monitors for 2025", "Not relevant for IT managers.", "2025-08-25T06:45:00Z"),
-        ("ars-technica", "Celebrity livestream on coding basics", "Not enterprise-critical IT.", "2025-08-25T06:30:00Z"),
-        ("reddit", "Fan-made mod released for popular game", "Gaming content, irrelevant.", "2025-08-25T06:15:00Z"),
-        ("toms-hardware", "New smartwatch review", "Consumer tech, not IT operationally relevant.", "2025-08-25T06:00:00Z"),
-        ("ars-technica", "Sci-fi convention highlights", "Irrelevant to IT managers.", "2025-08-25T05:45:00Z"),
-        ("reddit", "Fan theory about AI in movies", "Not operationally important.", "2025-08-25T05:30:00Z"),
-        ("toms-hardware", "Gaming peripherals sale", "Irrelevant to IT operations.", "2025-08-25T05:15:00Z"),
-        ("ars-technica", "Tech influencer livestream highlights", "Not IT-critical news.", "2025-08-25T05:00:00Z"),
-        ("reddit", "Funny programming memes", "Not relevant to IT management decisions.", "2025-08-25T04:45:00Z"),
-        ("toms-hardware", "Top consumer laptops 2025", "Not enterprise relevant.", "2025-08-25T04:30:00Z"),
-        ("ars-technica", "Unboxing of new gaming gear", "Not operationally important for IT managers.", "2025-08-25T04:15:00Z")
+        # --- Totally non-IT (fashion, lifestyle, entertainment) ---
+        ("vogue", "Top 10 summer makeup trends", "Beauty experts discuss new lipstick and eyeliner styles.", "2025-08-25T09:00:00Z"),
+        ("cosmopolitan", "Celebrity skincare routine revealed", "A deep dive into how celebrities maintain glowing skin.", "2025-08-25T08:45:00Z"),
+        ("elle", "Best handbags for fall 2025", "Fashion editors recommend luxury handbags for the new season.", "2025-08-25T08:30:00Z"),
+        ("glamour", "10 ways to style denim jackets", "A lifestyle piece on casual fashion ideas.", "2025-08-25T08:15:00Z"),
+        ("seventeen", "Top nail polish colors trending now", "Beauty segment focused on nail care trends.", "2025-08-25T08:00:00Z"),
+        ("vogue", "Paris Fashion Week highlights", "Runway shows featuring top designers.", "2025-08-25T07:45:00Z"),
+        ("cosmopolitan", "Must-have perfumes of 2025", "A guide to new fragrance releases.", "2025-08-25T07:30:00Z"),
+        ("elle", "How to accessorize with scarves", "Tips for adding scarves to outfits.", "2025-08-25T07:15:00Z"),
+        ("glamour", "Celebrity red carpet looks", "Coverage of star-studded events and fashion choices.", "2025-08-25T07:00:00Z"),
+        ("seventeen", "DIY face masks for glowing skin", "Homemade beauty tips for teenagers.", "2025-08-25T06:45:00Z"),
+
+        # --- Loosely connected consumer tech / gadgets (NOT IT manager critical) ---
+        ("toms-hardware", "Top 5 graphics cards for gamers", "Consumer tech review, not related to IT operations.", "2025-08-25T06:30:00Z"),
+        ("the-verge", "Best wireless earbuds of 2025", "Gadget review, not enterprise relevant.", "2025-08-25T06:15:00Z"),
+        ("engadget", "Smart home devices roundup", "Hobbyist tech, not relevant for IT management.", "2025-08-25T06:00:00Z"),
+        ("cnet", "Top fitness trackers compared", "Consumer electronics review, no IT impact.", "2025-08-25T05:45:00Z"),
+        ("techradar", "New gaming laptop benchmarks", "Performance test for gamers, not enterprise IT.", "2025-08-25T05:30:00Z"),
+        ("wired", "Celebrity launches a new VR headset", "Entertainment-focused product release.", "2025-08-25T05:15:00Z"),
+        ("gq", "Luxury smartwatch style guide", "Fashion and gadgets combined, irrelevant to IT ops.", "2025-08-25T05:00:00Z"),
+        ("ign", "Popular video game update released", "Gaming news, not operationally critical.", "2025-08-25T04:45:00Z"),
+        ("buzzfeed", "Funny memes about coding bootcamps", "Entertainment piece, not IT-relevant.", "2025-08-25T04:30:00Z"),
+        ("the-verge", "Celebrity influencer reviews new phone", "Consumer smartphone content, not IT-critical.", "2025-08-25T04:15:00Z")
     ], start=21)
 ]
+
 
 all_events = relevant_events + irrelevant_events
 

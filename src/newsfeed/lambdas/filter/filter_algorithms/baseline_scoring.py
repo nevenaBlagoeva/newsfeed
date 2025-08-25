@@ -74,6 +74,6 @@ def calculate_keyword_relevance_score(item: dict) -> float:
     total_points = kw_title_points + kw_body_points + rec_pts
 
     # Normalize to 0-1 (rough estimate)
-    max_possible_points = 50
+    max_possible_points = 35
     score = min(total_points / max_possible_points, 1.0)
     return score
