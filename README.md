@@ -57,7 +57,7 @@ The system follows an **event-driven, serverless pipeline** on AWS:
 
 ## 🔹 Architecture Diagram
 
-![Architecture](newsfeed_architecture.png)
+![Architecture](diagram.png)
 
 
 
