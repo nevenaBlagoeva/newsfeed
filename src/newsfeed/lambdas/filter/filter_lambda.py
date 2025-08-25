@@ -26,7 +26,7 @@ def lambda_handler(event: Dict[str, Any], context: Any, db_client: DynamoDBClien
 
         relevance_score = calculate_relevance_score(item, algorithm = 'word_score')
         logger.info(f"Calculated relevance score: {relevance_score}")
-        if relevance_score > 0.5:  # Threshold for filtering
+        if relevance_score > 0.35:  # Threshold for filtering
             filtered_item = create_filtered_item(item, relevance_score)
             db_client.put_item(filtered_item)
             processed += 1
