@@ -63,8 +63,16 @@ jobs:
             pip install --upgrade pip
             pip install --target "$PKG_DIR" -r requirements.txt
 
-            # Copy the entire newsfeed package
+            # Copy shared code
             cp -r src/newsfeed/* "$PKG_DIR/"
+
+            # Copy Lambda-specific code
+            if [ -d "src/newsfeed/lambdas/$LAMBDA" ]; then
+              cp -r src/newsfeed/lambdas/$LAMBDA/* "$PKG_DIR/"
+            else
+              echo "❌ Lambda folder src/newsfeed/lambdas/$LAMBDA does not exist"
+              exit 1
+            fi
 
             # Create zip
             (cd "$PKG_DIR" && zip -r "../newsfeed-${LAMBDA}.zip" . -x '__pycache__/*' '*.pyc')
