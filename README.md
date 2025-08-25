@@ -23,8 +23,6 @@ This project implements a **serverless news aggregation pipeline** that collects
   - [What I'd Improve With More Time](#what-id-improve-with-more-time)
 
 
----
-
 ## 🔹 Architecture Overview
 
 ![Alt text](images/diagram.png)
@@ -57,13 +55,12 @@ The system follows an **event-driven, serverless pipeline** on AWS:
      - If `?dashboard=true`, results are optimized for the dashboard.  
      - Otherwise, returns general filtered events.
 
----
 
 ## 🔹 Architecture Diagram
 
 ![Architecture](newsfeed_architecture.png)
 
----
+
 
 ## 🔹 API Usage
 
@@ -116,7 +113,6 @@ https://newsfeed-dashboard-8xl2fzqr.s3.eu-west-1.amazonaws.com/dashboard.html
 - Deterministic mode (`temperature=0`) and caching ensure stable results.  
 - Disabled by default due to cost/latency, but included as an **experimental enhancement**.  
 
----
 
 ## 🔹 Testing Strategy
 
@@ -137,7 +133,6 @@ https://newsfeed-dashboard-8xl2fzqr.s3.eu-west-1.amazonaws.com/dashboard.html
 - LLM optional, not default.  
 - Old events removed via **DynamoDB TTL**.  
 
----
 
 ## 🔹 Improvements & Future Work
 - Extract **Terraform** into reusable modules.  
@@ -153,7 +148,6 @@ https://newsfeed-dashboard-8xl2fzqr.s3.eu-west-1.amazonaws.com/dashboard.html
   - ML classifier (TF-IDF, BERT)  
   - Precision/recall benchmarking  
 
----
 
 ## 🔹 Tech Stack
 - **AWS** → Lambda, SQS, DynamoDB, API Gateway, EventBridge, CloudWatch  
@@ -163,7 +157,6 @@ https://newsfeed-dashboard-8xl2fzqr.s3.eu-west-1.amazonaws.com/dashboard.html
 - **Poetry** → Dependency management  
 - **pytest + moto** → Testing  
 
----
 
 ## 🔹 Reflection
 
@@ -184,5 +177,3 @@ For an **AI Engineer role**, I prototyped an optional **LLM-based filter**. This
 - CloudFront with Route 53  
 - CI/CD with **automated rollback**.  
 - Richer dashboard (search, filters, relevance tuning).  
-
----
