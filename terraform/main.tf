@@ -266,6 +266,24 @@ module "api_gateway" {
   retrieve_api_lambda_invoke_arn    = module.retrieve_lambda.lambda_function_arn
 }
 
+# Lambda permissions for API Gateway to invoke ingest_api lambda
+resource "aws_lambda_permission" "ingest_api_gateway_permission" {
+  statement_id  = "AllowAPIGatewayInvokeIngestAPI"
+  action        = "lambda:InvokeFunction"
+  function_name = module.ingest_api_lambda.lambda_function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${module.api_gateway.api_execution_arn}/*/*"
+}
+
+# Lambda permissions for API Gateway to invoke retrieve lambda
+resource "aws_lambda_permission" "retrieve_api_gateway_permission" {
+  statement_id  = "AllowAPIGatewayInvokeRetrieve"
+  action        = "lambda:InvokeFunction"
+  function_name = module.retrieve_lambda.lambda_function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${module.api_gateway.api_execution_arn}/*/*"
+}
+
 # Output the actual API URLs for debugging
 output "debug_api_urls" {
   value = {

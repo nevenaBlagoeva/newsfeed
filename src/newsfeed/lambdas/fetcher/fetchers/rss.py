@@ -32,7 +32,7 @@ class RSSFetcher(BaseFetcher):
                     'id': getattr(entry, 'guid', entry.link),
                     'title': entry.title,
                     'body': getattr(entry, 'summary', ''),
-                    'url': getattr(entry, 'url', url),
+                    'url': url,
                     'published_at': getattr(entry, 'published', datetime.now().isoformat())
                 })
             
