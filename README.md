@@ -77,19 +77,18 @@ The system follows an **event-driven, serverless pipeline** on AWS:
 ```
 
 ### Ingest News Event(s)
-```json
+```bash
 curl -X POST \
   https://MY-ENDPOINT.execute-api.eu-west-1.amazonaws.com/dev/ingest \
   -H "Content-Type: application/json" \
   -d @payload.json
-```
+
 
 ### Retrieve Filtered Events
 
-```json
+```bash
 curl https://MY-ENDPOINT.execute-api.eu-west-1.amazonaws.com/dev/retrieve
 
-```
 
 ### Dashboard 
 https://newsfeed-dashboard-8xl2fzqr.s3.eu-west-1.amazonaws.com/dashboard.html
@@ -104,7 +103,33 @@ https://newsfeed-dashboard-8xl2fzqr.s3.eu-west-1.amazonaws.com/dashboard.html
 **Scoring rules:**
 - Title matches are weighted more heavily than body matches.  
 - Recent items get a time-based boost.  
-- Final ranking = keyword score + recency score.  
+- Final ranking = keyword score + recency score.
+
+**Threshold Tuning & Scoring Validation:**
+To ensure the keyword-based filter effectively distinguishes relevant from irrelevant events, I ran precision and recall simulations on a synthetic dataset of 40 events (20 relevant, 20 irrelevant).
+
+The script applies calculate_keyword_relevance_score(event) and evaluates precision, recall, and the number of predicted relevant events across multiple thresholds. This helps determine an optimal score threshold for filtering while balancing false positives and false negatives.
+
+| Threshold | Precision | Recall | Predicted Relevants |
+|-----------|-----------|--------|-------------------|
+| 0.0       | 0.50      | 1.00   | 40                |
+| 0.1       | 0.50      | 1.00   | 40                |
+| 0.2       | 0.50      | 1.00   | 40                |
+| 0.3       | 0.89      | 0.80   | 18                |
+| 0.4       | 0.94      | 0.80   | 17                |
+| 0.5       | 0.94      | 0.75   | 16                |
+| 0.6       | 1.00      | 0.65   | 13                |
+| 0.7       | 1.00      | 0.50   | 10                |
+| 0.8       | 1.00      | 0.45   | 9                 |
+| 0.9       | 1.00      | 0.35   | 7                 |
+| 1.0       | 1.00      | 0.25   | 5                 |
+
+
+By analyzing this table, we can select a threshold that balances precision and recall according to operational priorities—for example, favoring higher recall for critical incident detection or higher precision to reduce false positives.
+
+This data-driven approach ensures the filter performs reliably before adding optional ML/LLM enhancements.
+
+The final threshold selected was 0.35 - a loose but reliable filter.
 
 ### Optional LLM-based Filtering
 - Uses **OpenAI API** for semantic classification.  
