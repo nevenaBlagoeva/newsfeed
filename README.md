@@ -55,12 +55,6 @@ The system follows an **event-driven, serverless pipeline** on AWS:
      - Otherwise, returns general filtered events.
 
 
-## 🔹 Architecture Diagram
-
-![Architecture](diagram.png)
-
-
-
 ## 🔹 API Usage
 
 ### Example Payload (`payload.json`)
