@@ -34,9 +34,8 @@ jobs:
 
       - name: Install dependencies & run tests
         run: |
-          # Install local package + dependencies
           poetry install
-          # Ensure newsfeed package is found for pytest
+          # Ensure local newsfeed package is found
           PYTHONPATH=src poetry run pytest
 
       - name: Export requirements from Poetry
@@ -63,8 +62,13 @@ jobs:
             pip install --upgrade pip
             pip install --target "$PKG_DIR" -r requirements.txt
 
-            # Copy source code (correct path)
-            cp -r src/newsfeed "$PKG_DIR"
+            # Copy Lambda-specific code
+            if [ -d "src/newsfeed/$LAMBDA" ]; then
+              cp -r src/newsfeed/$LAMBDA/* "$PKG_DIR/"
+            else
+              echo "❌ Lambda folder src/newsfeed/$LAMBDA does not exist"
+              exit 1
+            fi
 
             # Create zip
             (cd "$PKG_DIR" && zip -r "../newsfeed-${LAMBDA}.zip" . -x '__pycache__/*' '*.pyc')
