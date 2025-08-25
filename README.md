@@ -155,7 +155,8 @@ The final threshold selected was 0.35 - a loose but reliable filter.
 - Extract **Terraform** into reusable modules.  
 - **CI/CD improvements:**
   - Branch protection rules  
-  - Deploy only on merge to `main`  
+  - Deploy only on merge to `main`
+- error handling
 - Use **AWS SSM Parameter Store** for secret management.  
 - Multi-region **DynamoDB replication**.  
 - Host frontend with **CloudFront + Route 53**.  
