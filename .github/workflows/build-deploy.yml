@@ -35,16 +35,19 @@ jobs:
       - name: Install Poetry
         run: pip install poetry
 
-      - name: Update Poetry lock file
-        run: poetry lock
-
-      - name: Install dependencies and run tests
-        run: |
-          poetry install --no-root
-          poetry run pytest
-
-      - name: Export requirements from Poetry
+      - name: Export dependencies from Poetry
         run: poetry export -f requirements.txt --without-hashes -o requirements.txt
+
+      - name: Install dependencies & run tests
+        run: |
+          # Install dependencies including the local package
+          poetry install
+
+          # Make sure src/ is on PYTHONPATH
+          export PYTHONPATH=src
+
+          # Run pytest
+          poetry run pytest
 
       - name: Ensure artifact bucket exists (idempotent)
         run: |
@@ -62,12 +65,12 @@ jobs:
           rm -rf "$PKG_DIR" "$ZIP_DIR"
           mkdir -p "$PKG_DIR" "$ZIP_DIR"
 
-          # Copy full newsfeed package
-          cp -r src/newsfeed "$PKG_DIR/"
-
-          # Install dependencies
+          # Install dependencies into package folder
           pip install --upgrade pip
           pip install -r requirements.txt -t "$PKG_DIR"
+
+          # Copy full newsfeed package
+          cp -r src/newsfeed "$PKG_DIR"
 
           # Create zip
           (cd "$PKG_DIR" && zip -r "newsfeed-${{ matrix.lambda }}.zip" . -x "__pycache__/*" "*.pyc")
