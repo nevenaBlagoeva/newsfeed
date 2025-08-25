@@ -17,10 +17,11 @@ def lambda_handler(event: Dict[str, Any], context: Any, db_client: DynamoDBClien
     if db_client is None:
         db_client = DynamoDBClient(table_name)
 
-    logger.info(f"Processing {len(event['Records'])} records")
+    records = event.get('Records', [])
+    logger.info(f"Processing {len(records)} records")
     processed = 0
 
-    for record in event["Records"]:
+    for record in records:
         item = extract_stream_item(record)
 
         relevance_score = calculate_relevance_score(item, algorithm = 'word_score')
