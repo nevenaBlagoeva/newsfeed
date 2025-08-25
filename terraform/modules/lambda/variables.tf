@@ -14,3 +14,8 @@ variable "environment_variables" {
   type        = map(string)
   default     = {}
 }
+
+variable "dir" {
+  description = "Directory containing the Lambda function code"
+  type        = string
+}

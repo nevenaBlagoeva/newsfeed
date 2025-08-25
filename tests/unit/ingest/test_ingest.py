@@ -1,110 +1,51 @@
-import hashlib
-import boto3
 import json
-import unittest
-from datetime import datetime, timezone
+import pytest
+from unittest.mock import MagicMock
+from newsfeed.lambdas.ingest.ingest_lambda import lambda_handler
+from newsfeed.shared.news_item import NewsItem
 
-# Configuration
-LAMBDA_NAME = "newsfeed-ingest"
-RAW_DYNAMO_TABLE = "RawEvents"
-FILTERED_DYNAMO_TABLE = "FilteredEvents"
+@pytest.fixture
+def sample_event():
+    return {
+        "Records": [
+            {"body": json.dumps({
+                "id": "123",
+                "title": "Python 3.12 Released",
+                "source": "reddit",
+                "published_at": "2025-08-24T12:00:00Z",
+                "score": 100,
+                "url": "https://reddit.com/r/Python/comments/123"
+            })}
+        ]
+    }
 
-lambda_client = boto3.client("lambda")
-dynamodb = boto3.resource("dynamodb")
-tableRaw = dynamodb.Table(RAW_DYNAMO_TABLE)
-tableFiltered = dynamodb.Table(FILTERED_DYNAMO_TABLE)
+def test_lambda_processes_valid_item(sample_event):
+    mock_client = MagicMock()
+    mock_client.event_exists.return_value = False
 
-def generate_fingerprint(body_str):
-    """Generate fingerprint from JSON string body"""
-    body = json.loads(body_str) if isinstance(body_str, str) else body_str
-    content = f"{body['title']}{body.get('published_at', '')}{body['source']}"
-    return hashlib.md5(content.encode()).hexdigest()
+    result = lambda_handler(sample_event, None, db_client=mock_client)
 
-class TestDeployedLambda(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.table_keys = []  # Track all inserted items across all tests
+    assert result["processed"] == 1
+    assert result["skipped"] == 0
+    mock_client.put_item.assert_called_once()
 
-    @classmethod
-    def tearDownClass(cls):
-        # Cleanup all test items even if tests fail
-        for key in cls.table_keys:
-            try:
-                # The Lambda uses fingerprint as the actual key, not the original ID
-                fingerprint = generate_fingerprint(json.dumps({
-                    "id": key,
-                    "source": "reddit", 
-                    "title": "Test Article",  # This won't match but we need something
-                    "published_at": ""
-                }))
-                
-                # Try deleting with fingerprint as key
-                tableRaw.delete_item(Key={"id": fingerprint})
-                print(f"Cleaned up test item: {fingerprint}")
-            except Exception as e:
-                print(f"Failed to clean up {key}: {e}")
+def test_lambda_skips_duplicate(sample_event):
+    mock_client = MagicMock()
+    mock_client.event_exists.return_value = True
 
-    def _invoke_lambda(self, event):
-        """Helper to invoke the deployed Lambda and parse the response"""
-        response = lambda_client.invoke(
-            FunctionName=LAMBDA_NAME,
-            InvocationType="RequestResponse",
-            Payload=json.dumps(event),
-        )
-        payload = response["Payload"].read()
-        return json.loads(payload)
+    result = lambda_handler(sample_event, None, db_client=mock_client)
 
-    def test_lambda_success(self):
-        """Test sending a valid SQS message"""
-        test_id = f"e2e-test-{int(datetime.now().timestamp())}"
+    assert result["processed"] == 0
+    assert result["skipped"] == 1
+    mock_client.put_item.assert_not_called()
 
-        article_data = {
-            "id": test_id,
-            "source": "reddit",
-            "title": "E2E Test Article",
-            "body": "This is an end-to-end test",
-            "published_at": datetime.now(timezone.utc).isoformat(),
-            "url": f"https://reddit.com/{test_id}"
-        }
+def test_lambda_skips_invalid_item(sample_event, monkeypatch):
+    # Patch NewsItem.validate to return False
+    monkeypatch.setattr(NewsItem, "validate", lambda self: False)
+    mock_client = MagicMock()
 
-        event = {
-            "Records": [{
-                "body": json.dumps(article_data)
-            }]
-        }
+    result = lambda_handler(sample_event, None, db_client=mock_client)
 
-        # Track the fingerprint that will be used as the actual key
-        fingerprint = generate_fingerprint(json.dumps(article_data))
-        self.__class__.table_keys.append(fingerprint)
-
-        result = self._invoke_lambda(event)
-        self.assertEqual(result["processed"], 1)
-        self.assertEqual(result["skipped"], 0)
-
-    def test_lambda_duplicate_handling(self):
-        """Test duplicate message detection"""
-        test_id = f"e2e-dup-{int(datetime.now().timestamp())}"
-
-        article = {
-            "id": test_id,
-            "source": "reddit",
-            "title": "Duplicate Test Article",
-            "body": "Same content",
-            "published_at": datetime.now(timezone.utc).isoformat(),
-            "url": f"https://reddit.com/{test_id}"
-        }
-
-        event = {"Records": [{"body": json.dumps(article)}, {"body": json.dumps(article)}]}
-
-        # Track the fingerprint that will be used as the actual key
-        fingerprint = generate_fingerprint(json.dumps(article))
-        self.__class__.table_keys.append(fingerprint)
-
-        result = self._invoke_lambda(event)
-        self.assertEqual(result["processed"], 1)
-        self.assertEqual(result["skipped"], 1)
-
-
-if __name__ == "__main__":
-    print("🧪 Running end-to-end tests against deployed Lambda...")
-    unittest.main()
+    assert result["processed"] == 0
+    assert result["skipped"] == 1
+    mock_client.put_item.assert_not_called()

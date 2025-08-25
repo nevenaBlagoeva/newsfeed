@@ -7,6 +7,7 @@ on:
 env:
   ARTIFACT_BUCKET: newsfeed-lambda-artifacts
   AWS_REGION: eu-west-1
+  BUILD_DIR: .build
 
 jobs:
   build:
@@ -23,7 +24,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-1
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -41,30 +42,45 @@ jobs:
           poetry install --no-root
           poetry run pytest
 
+      - name: Export requirements from Poetry
+        run: poetry export -f requirements.txt --without-hashes -o requirements.txt
+
       - name: Ensure artifact bucket exists (idempotent)
         run: |
           aws s3api head-bucket --bucket "$ARTIFACT_BUCKET" 2>/dev/null || \
           aws s3 mb "s3://$ARTIFACT_BUCKET"
 
-      - name: Package Lambdas
+      - name: Package Lambda
         run: |
-          cd src/lambdas/${{ matrix.lambda }}
+          set -e
+          SRC_DIR=src/lambdas/${{ matrix.lambda }}
+          PKG_DIR=${{ env.BUILD_DIR }}/pkg_${{ matrix.lambda }}
+          ZIP_DIR=${{ env.BUILD_DIR }}/${{ matrix.lambda }}
+          ZIPFILE=$ZIP_DIR/newsfeed-${{ matrix.lambda }}.zip
 
-          # Copy shared directory to lambda directory
-          cp -r $GITHUB_WORKSPACE/src/shared ./shared
+          # Clean previous build
+          rm -rf "$PKG_DIR" "$ZIP_DIR"
+          mkdir -p "$PKG_DIR" "$ZIP_DIR"
 
-          # Install requirements if they exist
-          if [ -f requirements.txt ]; then
-            pip install -r requirements.txt -t .
-          fi
+          # Copy lambda code
+          cp -r "$SRC_DIR"/* "$PKG_DIR"/
 
-          # Create zip file in root directory
-          zip -r ../../../newsfeed-${{ matrix.lambda }}.zip . -x "__pycache__/*" "*.pyc"
+          # Copy shared code
+          cp -r src/shared "$PKG_DIR/"
+          touch "$PKG_DIR/shared/__init__.py"
+
+          # Install dependencies from freshly exported requirements.txt
+          pip install --upgrade pip
+          pip install -r requirements.txt -t "$PKG_DIR"
+
+          # Create zip
+          (cd "$PKG_DIR" && zip -r "newsfeed-${{ matrix.lambda }}.zip" . -x "__pycache__/*" "*.pyc")
+          mv "$PKG_DIR/newsfeed-${{ matrix.lambda }}.zip" "$ZIPFILE"
 
       - name: Upload artifact to S3
         run: |
-          aws s3 cp ./newsfeed-${{ matrix.lambda }}.zip \
-            s3://$ARTIFACT_BUCKET/newsfeed-${{ matrix.lambda }}.zip
+          aws s3 cp ${{ env.BUILD_DIR }}/${{ matrix.lambda }}/newsfeed-${{ matrix.lambda }}.zip \
+            s3://$ARTIFACT_BUCKET/${{ matrix.lambda }}/newsfeed-${{ matrix.lambda }}.zip
 
   deploy:
     runs-on: ubuntu-latest

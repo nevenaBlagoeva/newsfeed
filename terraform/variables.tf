@@ -15,3 +15,9 @@ variable "reddit_client_secret" {
   type        = string
   sensitive   = true
 }
+
+variable "openai_api_key" {
+  description = "OpenAI API key for content scoring"
+  type        = string
+  sensitive   = true
+}

@@ -47,7 +47,7 @@ locals {
 resource "aws_s3_object" "dashboard_html" {
   bucket       = aws_s3_bucket.dashboard.id
   key          = "dashboard.html"
-  content      = replace(file("${path.module}/../src/dashboard/dashboard.html"), "PLACEHOLDER_API_URL", local.api_base_url)
+  content      = replace(file("${path.module}/../src/newsfeed/dashboard/dashboard.html"), "PLACEHOLDER_API_URL", local.api_base_url)
   content_type = "text/html"
-  etag         = md5(replace(file("${path.module}/../src/dashboard/dashboard.html"), "PLACEHOLDER_API_URL", local.api_base_url))
+  etag         = md5(replace(file("${path.module}/../src/newsfeed/dashboard/dashboard.html"), "PLACEHOLDER_API_URL", local.api_base_url))
 }

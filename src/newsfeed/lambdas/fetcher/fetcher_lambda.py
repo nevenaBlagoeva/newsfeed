@@ -1,0 +1,52 @@
+from newsfeed.lambdas.fetcher.sources.config import SOURCES
+import json
+import boto3
+import os
+from typing import Dict, Any
+import logging
+
+# Initialize SQS client at module level
+sqs = boto3.client('sqs')
+
+# Set up logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
+
+def lambda_handler(event: Dict[str, Any], context: Any) -> None:
+    logger.info(f"Starting fetcher lambda with {len(SOURCES)} sources")
+    
+    # Get queue URL from environment variable
+    queue_url = os.getenv('SQS_QUEUE_URL')
+    if not queue_url:
+        raise ValueError("SQS_QUEUE_URL environment variable not set")
+    
+    all_events = []
+    
+    for source_config in SOURCES:
+        try:
+            source_class = source_config["class"]
+            config = source_config["config"]
+            
+            # Instantiate the fetcher with its config
+            fetcher = source_class(**config)
+            
+            # Fetch articles
+            events = fetcher.fetch()
+            all_events.extend(events)
+            
+        except Exception as e:
+            logger.error(f"Source {source_config.get('name', 'unknown')} failed: {str(e)}")
+
+    # Send events to SQS
+    sent_count = 0
+    for event in all_events:
+        try:
+            sqs.send_message(
+                QueueUrl=queue_url,
+                MessageBody=json.dumps(event),
+            )
+            sent_count += 1
+        except Exception as e:
+            logger.error(f"Failed to send event to SQS: {str(e)}")
+
+    logger.info(f"Completed: fetched {len(all_events)} events, sent {sent_count} to SQS")

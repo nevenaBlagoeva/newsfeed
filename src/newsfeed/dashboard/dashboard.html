@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Newsfeed Dashboard</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:#f5f7fa; color:#2c3e50; line-height:1.6; }
+
+.header { background:linear-gradient(135deg,#2C5530 0%,#1A3B1E 100%); color:white; padding:3rem 1rem; text-align:center; box-shadow:0 4px 20px rgba(44,85,48,0.3); }
+.header h1 { font-size:3rem; margin-bottom:0.5rem; background:linear-gradient(45deg,#4CAF50,#8BC34A); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.header p { font-size:1.2rem; opacity:0.9; font-style:italic; }
+.header #lastUpdated { font-size:0.9rem; margin-top:0.5rem; opacity:0.8; }
+
+.controls { max-width:1200px; margin:2rem auto; padding:0 1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; }
+.refresh-btn { background:#667eea; color:white; border:none; padding:0.8rem 1.5rem; border-radius:8px; cursor:pointer; font-size:1rem; transition:all 0.3s ease; }
+.refresh-btn:hover { background:#5a6fd8; transform:translateY(-1px); }
+
+.status { padding:0.5rem 1rem; border-radius:6px; font-weight:500; }
+.status.loading { background:#fff3cd; color:#856404; }
+.status.success { background:#d4edda; color:#155724; }
+.status.error { background:#f8d7da; color:#721c24; }
+.status.loading::after { content:' ⏳'; animation:blink 1s infinite; }
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+.container { max-width:1200px; margin:0 auto; padding:0 1rem 2rem; }
+.news-list { max-width:900px; margin:0 auto; padding:0 1rem; }
+
+.news-item {
+    background:white;
+    border-radius:20px;
+    padding:1.8rem;
+    margin-bottom:1.5rem;
+    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+    position:relative;
+    overflow:hidden;
+    opacity:0;
+    transform:translateY(20px);
+    animation:fadeIn 0.5s forwards;
+}
+
+.news-item:hover {
+    transform:none;
+    box-shadow:0 6px 18px rgba(0,0,0,0.1);
+}
+
+@keyframes fadeIn { to {opacity:1; transform:translateY(0);} }
+
+.news-badges {
+    display:flex;
+    gap:0.6rem;
+    margin-bottom:0.8rem;
+    flex-wrap:wrap;
+}
+.badge { padding:0.4rem 1rem; border-radius:20px; font-size:0.8rem; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; cursor:pointer; transition:transform 0.2s ease; }
+.badge:hover { transform:scale(1.05); box-shadow:0 2px 8px rgba(0,0,0,0.15); }
+.source-badge { background:linear-gradient(135deg,#667eea,#764ba2); color:white; }
+.relevance-badge { background:linear-gradient(135deg,#4facfe,#00f2fe); color:white; }
+
+.news-title { font-size:1.5rem; font-weight:700; margin-bottom:1rem; color:#2c3e50; }
+.news-title a { color:#2c3e50; text-decoration:none; transition:color 0.3s ease; }
+.news-title a:hover { color:#4CAF50; }
+
+.news-footer {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding-top:0.8rem;
+    border-top:1px solid #f0f0f0;
+    font-size:0.9rem;
+    flex-wrap:wrap;
+    gap:0.5rem;
+}
+
+.news-time { color:#4CAF50; font-weight:600; }
+
+.read-more-btn {
+    background:linear-gradient(135deg,#4CAF50,#8BC34A);
+    color:white !important;
+    border:none;
+    padding:0.6rem 1.2rem;
+    border-radius:25px;
+    text-decoration:none !important;
+    font-weight:600;
+    font-size:0.9rem;
+    display:inline-flex;
+    align-items:center;
+    gap:0.4rem;
+    box-shadow:0 3px 10px rgba(76,175,80,0.2);
+    transition:all 0.3s ease;
+}
+.read-more-btn:hover {
+    transform:translateY(-2px);
+    box-shadow:0 6px 16px rgba(76,175,80,0.3);
+    text-decoration:none !important;
+}
+
+.empty-state { text-align:center; padding:3rem; color:#7f8c8d; animation:fadeIn 0.5s forwards; }
+
+@media(max-width:768px){ .header h1{ font-size:2rem; } .controls{ flex-direction:column; align-items:stretch; } }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <h1>🌿 Nevena's NewsHub</h1>
+    <p>Curated tech insights, ranked by intelligence</p>
+    <p id="lastUpdated">Last updated: --</p>
+</div>
+
+<div class="controls">
+    <button class="refresh-btn" onclick="loadNews()">🔄 Refresh Feed</button>
+    <div id="status" class="status loading">Loading curated content...</div>
+    <input type="text" id="searchBox" placeholder="Search news..." oninput="filterNews()">
+</div>
+
+<div class="container">
+    <div id="newsContainer" class="news-list"></div>
+</div>
+
+<script>
+const API_BASE_URL = 'PLACEHOLDER_API_URL';
+let newsData = [];
+let filteredNews = [];
+
+async function loadNews(){
+    const statusEl=document.getElementById('status');
+    const containerEl=document.getElementById('newsContainer');
+    try{
+        updateStatus('Loading news...', 'loading');
+        const response=await fetch(`${API_BASE_URL}/retrieve?dashboard=true`);
+        if(!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        const news=await response.json();
+        newsData = news;
+        filteredNews = [...news];
+        if(news.length===0){
+            containerEl.innerHTML = `<div class="empty-state"><h3>📭 No news available</h3><p>Check back later for new filtered content!</p></div>`;
+        }else{
+            renderNews(filteredNews);
+        }
+        updateStatus(`✅ Loaded ${news.length} articles`, 'success');
+        updateLastRefresh();
+    }catch(error){
+        console.error(error);
+        updateStatus(`❌ Error: ${error.message}`, 'error');
+        containerEl.innerHTML = `<div class="empty-state"><h3>⚠️ Failed to load news</h3><p>${error.message}</p></div>`;
+    }
+}
+
+function renderNews(news){
+    const containerEl=document.getElementById('newsContainer');
+    containerEl.innerHTML = news.map((item,index)=>{
+        const publishedDate = new Date(item.published_at || Date.now());
+        const relevanceScore = item.SK ? parseFloat(item.SK.split('#')[0]) : (item.relevance_score || 0.5);
+        const relevanceOutOf10 = Math.round(relevanceScore * 10);
+        const articleUrl = item.url && item.url.startsWith('http') ? item.url : '';
+
+        return `<div class="news-item">
+            <div class="news-badges">
+                <span class="badge source-badge" onclick="filterBySource('${item.source}')">${item.source}</span>
+                <span class="badge relevance-badge">Relevance: ${relevanceOutOf10}/10</span>
+            </div>
+            <h2 class="news-title">${escapeHtml(item.title)}</h2>
+            <div class="news-footer">
+                <div class="news-time">📅 ${publishedDate.toLocaleDateString()}</div>
+                ${articleUrl ? `<a href="${articleUrl}" target="_blank" class="read-more-btn">🔗 Link</a>` : '<span>No link available</span>'}
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function updateStatus(msg,type){
+    const el=document.getElementById('status');
+    el.textContent=msg;
+    el.className=`status ${type}`;
+}
+
+function updateLastRefresh(){
+    const el=document.getElementById('lastUpdated');
+    el.textContent=`Last updated: ${new Date().toLocaleTimeString()}`;
+}
+
+function escapeHtml(text){ const div=document.createElement('div'); div.textContent=text; return div.innerHTML; }
+
+function filterNews(){
+    const query=document.getElementById('searchBox').value.toLowerCase();
+    filteredNews = newsData.filter(n => (n.title||'').toLowerCase().includes(query));
+    renderNews(filteredNews);
+}
+
+function filterBySource(source){
+    filteredNews = newsData.filter(n=>n.source===source);
+    renderNews(filteredNews);
+}
+
+document.addEventListener('DOMContentLoaded', loadNews);
+setInterval(loadNews,5*60*1000);
+</script>
+
+</body>
+</html>

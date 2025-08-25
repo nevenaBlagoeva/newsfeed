@@ -17,7 +17,8 @@ module "fetcher_lambda" {
   source = "./modules/lambda"
   
   function_name = "newsfeed-fetcher"
-  handler       = "fetcher_lambda.lambda_handler"
+  handler       = "newsfeed.lambdas.fetcher.fetcher_lambda.lambda_handler"
+  dir          = "fetcher"
 
   environment_variables = {
     REDDIT_CLIENT_ID     = var.reddit_client_id
@@ -62,7 +63,8 @@ module "ingest_lambda" {
   source = "./modules/lambda"
   
   function_name = "newsfeed-ingest"
-  handler       = "ingest_lambda.lambda_handler"
+  handler       = "newsfeed.lambdas.ingest.ingest_lambda.lambda_handler"
+  dir          = "ingest"
 
   environment_variables = {
     DYNAMODB_TABLE_NAME = module.raw_events_table.table_name
@@ -132,10 +134,12 @@ module "filter_lambda" {
   source = "./modules/lambda"
   
   function_name = "newsfeed-filter"
-  handler       = "filter_lambda.lambda_handler"
+  handler       = "newsfeed.lambdas.filter.filter_lambda.lambda_handler"
+  dir          = "filter"
   
   environment_variables = {
     FILTERED_TABLE_NAME = module.filtered_events_table.table_name
+    OPENAI_API_KEY      = var.openai_api_key
   }
 }
 
@@ -192,7 +196,8 @@ module "ingest_api_lambda" {
   source = "./modules/lambda"
   
   function_name = "newsfeed-ingest_api"
-  handler       = "ingest_api_lambda.lambda_handler"
+  handler       = "newsfeed.lambdas.ingest_api.ingest_api_lambda.lambda_handler"
+  dir          = "ingest_api"
 
   environment_variables = {
     DYNAMODB_TABLE_NAME = module.raw_events_table.table_name
@@ -224,8 +229,9 @@ module "retrieve_lambda" {
   source = "./modules/lambda"
   
   function_name = "newsfeed-retrieve"
-  handler       = "retrieve_lambda.lambda_handler"  # This should match the actual file name
-  
+  handler       = "newsfeed.lambdas.retrieve.retrieve_lambda.lambda_handler"
+  dir          = "retrieve"
+
   environment_variables = {
     FILTERED_TABLE_NAME = module.filtered_events_table.table_name
   }
