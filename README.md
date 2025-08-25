@@ -82,13 +82,13 @@ curl -X POST \
   https://MY-ENDPOINT.execute-api.eu-west-1.amazonaws.com/dev/ingest \
   -H "Content-Type: application/json" \
   -d @payload.json
-
+```bash
 
 ### Retrieve Filtered Events
 
 ```bash
 curl https://MY-ENDPOINT.execute-api.eu-west-1.amazonaws.com/dev/retrieve
-
+```bash
 
 ### Dashboard 
 https://newsfeed-dashboard-8xl2fzqr.s3.eu-west-1.amazonaws.com/dashboard.html
