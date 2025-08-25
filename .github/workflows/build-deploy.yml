@@ -45,6 +45,11 @@ jobs:
           aws s3api head-bucket --bucket "$ARTIFACT_BUCKET" 2>/dev/null || \
           aws s3 mb "s3://$ARTIFACT_BUCKET"
 
+      - name: Debug file structure
+        run: |
+          echo "Listing Lambdas folder..."
+          ls -R src/newsfeed/lambdas
+
       - name: Package and upload Lambdas
         run: |
           set -euo pipefail
