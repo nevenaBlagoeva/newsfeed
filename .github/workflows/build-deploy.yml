@@ -29,12 +29,20 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Upgrade pip
+        run: pip install --upgrade pip
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libssl-dev libffi-dev python3-dev
+
       - name: Install Poetry
         run: pip install "poetry==1.5.1"
 
       - name: Install dependencies & run tests
         run: |
-          poetry install
+          poetry install -vvv
           PYTHONPATH=src poetry run pytest
 
       - name: Export requirements from Poetry
@@ -45,9 +53,9 @@ jobs:
           aws s3api head-bucket --bucket "$ARTIFACT_BUCKET" 2>/dev/null || \
           aws s3 mb "s3://$ARTIFACT_BUCKET"
 
-      - name: Debug file structure
+      - name: Debug Lambdas folder
         run: |
-          echo "Listing Lambdas folder..."
+          echo "Listing contents of src/newsfeed/lambdas:"
           ls -R src/newsfeed/lambdas
 
       - name: Package and upload Lambdas
