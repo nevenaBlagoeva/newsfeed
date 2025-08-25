@@ -32,15 +32,17 @@ jobs:
       - name: Install Poetry 1.5.1
         run: pip install "poetry==1.5.1"
 
-      - name: Install dependencies
+      - name: Install dependencies & run tests
         run: |
+          # Install local package + dependencies
           poetry install
-          poetry run pytest  # runs tests with your local package installed
+          # Ensure newsfeed package is found for pytest
+          PYTHONPATH=src poetry run pytest
 
       - name: Export requirements from Poetry
         run: poetry export -f requirements.txt --without-hashes -o requirements.txt
 
-      - name: Ensure artifact bucket exists (idempotent)
+      - name: Ensure artifact bucket exists
         run: |
           aws s3api head-bucket --bucket "$ARTIFACT_BUCKET" 2>/dev/null || \
           aws s3 mb "s3://$ARTIFACT_BUCKET"
@@ -48,7 +50,7 @@ jobs:
       - name: Package and upload Lambdas
         run: |
           for LAMBDA in ${{ env.LAMBDAS }}; do
-            echo " Packaging Lambda: $LAMBDA"
+            echo "📦 Packaging Lambda: $LAMBDA"
 
             ZIP_DIR="${{ env.BUILD_DIR }}/$LAMBDA"
             PKG_DIR="$ZIP_DIR/pkg"
@@ -61,7 +63,7 @@ jobs:
             pip install --upgrade pip
             pip install --target "$PKG_DIR" -r requirements.txt
 
-            # Copy source code
+            # Copy source code (correct path)
             cp -r src/newsfeed "$PKG_DIR"
 
             # Create zip
@@ -71,7 +73,7 @@ jobs:
             MISSING=0
             for pkg in ${{ env.REQUIRED_PACKAGES }}; do
               if [ ! -d "$PKG_DIR/$pkg" ]; then
-                echo " Missing $pkg in Lambda: $LAMBDA"
+                echo "❌ Missing $pkg in Lambda: $LAMBDA"
                 MISSING=1
               fi
             done
