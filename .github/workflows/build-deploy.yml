@@ -8,6 +8,7 @@ env:
   ARTIFACT_BUCKET: newsfeed-lambda-artifacts
   AWS_REGION: eu-west-1
   BUILD_DIR: .build
+  REQUIRED_PACKAGES: "praw pydantic feedparser"
 
 jobs:
   build:
@@ -53,7 +54,6 @@ jobs:
       - name: Package Lambda
         run: |
           set -e
-          SRC_DIR=src/lambdas/${{ matrix.lambda }}
           PKG_DIR=${{ env.BUILD_DIR }}/pkg_${{ matrix.lambda }}
           ZIP_DIR=${{ env.BUILD_DIR }}/${{ matrix.lambda }}
           ZIPFILE=$ZIP_DIR/newsfeed-${{ matrix.lambda }}.zip
@@ -62,20 +62,25 @@ jobs:
           rm -rf "$PKG_DIR" "$ZIP_DIR"
           mkdir -p "$PKG_DIR" "$ZIP_DIR"
 
-          # Copy lambda code
-          cp -r "$SRC_DIR"/* "$PKG_DIR"/
+          # Copy full newsfeed package
+          cp -r src/newsfeed "$PKG_DIR/"
 
-          # Copy shared code
-          cp -r src/shared "$PKG_DIR/"
-          touch "$PKG_DIR/shared/__init__.py"
-
-          # Install dependencies from freshly exported requirements.txt
+          # Install dependencies
           pip install --upgrade pip
           pip install -r requirements.txt -t "$PKG_DIR"
 
           # Create zip
           (cd "$PKG_DIR" && zip -r "newsfeed-${{ matrix.lambda }}.zip" . -x "__pycache__/*" "*.pyc")
           mv "$PKG_DIR/newsfeed-${{ matrix.lambda }}.zip" "$ZIPFILE"
+
+      - name: Verify required packages
+        run: |
+          for pkg in ${{ env.REQUIRED_PACKAGES }}; do
+            if [ ! -d "${{ env.BUILD_DIR }}/pkg_${{ matrix.lambda }}/$pkg" ]; then
+              echo "Missing $pkg in Lambda: ${{ matrix.lambda }}"
+              exit 1
+            fi
+          done
 
       - name: Upload artifact to S3
         run: |
