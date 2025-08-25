@@ -8,15 +8,12 @@ env:
   ARTIFACT_BUCKET: newsfeed-lambda-artifacts
   AWS_REGION: eu-west-1
   BUILD_DIR: .build
-  REQUIRED_PACKAGES: "praw pydantic feedparser"
+  LAMBDAS: fetcher filter ingest ingest_api retrieve
+  REQUIRED_PACKAGES: praw pydantic feedparser
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        lambda: [fetcher, filter, ingest, ingest_api, retrieve]
-
     steps:
       - uses: actions/checkout@v4
 
@@ -32,70 +29,63 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install Poetry
-        run: pip install poetry
+      - name: Install Poetry 1.5.1
+        run: pip install "poetry==1.5.1"
 
-      - name: Export dependencies from Poetry
-        run: poetry export -f requirements.txt --without-hashes -o requirements.txt
-
-      - name: Install dependencies & run tests
+      - name: Install dependencies
         run: |
-          # Install dependencies including the local package
           poetry install
+          poetry run pytest  # runs tests with your local package installed
 
-          # Make sure src/ is on PYTHONPATH
-          export PYTHONPATH=src
-
-          # Run pytest
-          poetry run pytest
+      - name: Export requirements from Poetry
+        run: poetry export -f requirements.txt --without-hashes -o requirements.txt
 
       - name: Ensure artifact bucket exists (idempotent)
         run: |
           aws s3api head-bucket --bucket "$ARTIFACT_BUCKET" 2>/dev/null || \
           aws s3 mb "s3://$ARTIFACT_BUCKET"
 
-      - name: Package Lambda
+      - name: Package and upload Lambdas
         run: |
-          set -e
-          PKG_DIR=${{ env.BUILD_DIR }}/pkg_${{ matrix.lambda }}
-          ZIP_DIR=${{ env.BUILD_DIR }}/${{ matrix.lambda }}
-          ZIPFILE=$ZIP_DIR/newsfeed-${{ matrix.lambda }}.zip
+          for LAMBDA in ${{ env.LAMBDAS }}; do
+            echo " Packaging Lambda: $LAMBDA"
 
-          # Clean previous build
-          rm -rf "$PKG_DIR" "$ZIP_DIR"
-          mkdir -p "$PKG_DIR" "$ZIP_DIR"
+            ZIP_DIR="${{ env.BUILD_DIR }}/$LAMBDA"
+            PKG_DIR="$ZIP_DIR/pkg"
+            ZIPFILE="$ZIP_DIR/newsfeed-${LAMBDA}.zip"
 
-          # Install dependencies into package folder
-          pip install --upgrade pip
-          pip install -r requirements.txt -t "$PKG_DIR"
+            rm -rf "$PKG_DIR" "$ZIP_DIR"
+            mkdir -p "$PKG_DIR" "$ZIP_DIR"
 
-          # Copy full newsfeed package
-          cp -r src/newsfeed "$PKG_DIR"
+            # Install dependencies into package folder
+            pip install --upgrade pip
+            pip install --target "$PKG_DIR" -r requirements.txt
 
-          # Create zip
-          (cd "$PKG_DIR" && zip -r "newsfeed-${{ matrix.lambda }}.zip" . -x "__pycache__/*" "*.pyc")
-          mv "$PKG_DIR/newsfeed-${{ matrix.lambda }}.zip" "$ZIPFILE"
+            # Copy source code
+            cp -r src/newsfeed "$PKG_DIR"
 
-      - name: Verify required packages
-        run: |
-          for pkg in ${{ env.REQUIRED_PACKAGES }}; do
-            if [ ! -d "${{ env.BUILD_DIR }}/pkg_${{ matrix.lambda }}/$pkg" ]; then
-              echo "Missing $pkg in Lambda: ${{ matrix.lambda }}"
-              exit 1
-            fi
+            # Create zip
+            (cd "$PKG_DIR" && zip -r "../newsfeed-${LAMBDA}.zip" . -x '__pycache__/*' '*.pyc')
+
+            # Verify required packages
+            MISSING=0
+            for pkg in ${{ env.REQUIRED_PACKAGES }}; do
+              if [ ! -d "$PKG_DIR/$pkg" ]; then
+                echo " Missing $pkg in Lambda: $LAMBDA"
+                MISSING=1
+              fi
+            done
+            if [ $MISSING -ne 0 ]; then exit 1; fi
+
+            # Upload to S3
+            aws s3 cp "$ZIPFILE" "s3://$ARTIFACT_BUCKET/${LAMBDA}/newsfeed-${LAMBDA}.zip"
           done
-
-      - name: Upload artifact to S3
-        run: |
-          aws s3 cp ${{ env.BUILD_DIR }}/${{ matrix.lambda }}/newsfeed-${{ matrix.lambda }}.zip \
-            s3://$ARTIFACT_BUCKET/${{ matrix.lambda }}/newsfeed-${{ matrix.lambda }}.zip
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
