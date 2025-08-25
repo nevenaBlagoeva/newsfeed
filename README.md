@@ -33,7 +33,6 @@ The system follows an **event-driven, serverless pipeline** on AWS:
    - Reddit API  
    - Ars Technica RSS  
    - Hacker News API  
-   - Mock API (for testing)
 
 2. **SQS Queue** buffers events before ingestion.
 
