@@ -40,9 +40,9 @@ jobs:
       - name: Install Poetry
         run: pip install "poetry==1.5.1"
 
-      - name: Install dependencies & run tests
+      - name: Install dependencies (no root) & run tests
         run: |
-          poetry install -vvv
+          poetry install --no-root -vvv
           PYTHONPATH=src poetry run pytest
 
       - name: Export requirements from Poetry
