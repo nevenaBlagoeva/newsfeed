@@ -104,7 +104,7 @@ https://newsfeed-dashboard-8xl2fzqr.s3.eu-west-1.amazonaws.com/dashboard.html
 - Recent items get a time-based boost.  
 - Final ranking = keyword score + recency score.
 
-**Threshold Tuning & Scoring Validation:**
+### Threshold Tuning & Scoring Validation:
 To ensure the keyword-based filter effectively distinguishes relevant from irrelevant events, I ran precision and recall simulations on a synthetic dataset of 40 events (20 relevant, 20 irrelevant).
 
 The script applies calculate_keyword_relevance_score(event) and evaluates precision, recall, and the number of predicted relevant events across multiple thresholds. This helps determine an optimal score threshold for filtering while balancing false positives and false negatives.
