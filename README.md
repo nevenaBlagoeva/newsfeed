@@ -156,7 +156,7 @@ The final threshold selected was 0.35 - a loose but reliable filter.
 - **CI/CD improvements:**
   - Branch protection rules  
   - Deploy only on merge to `main`
-- error handling
+- Error handling
 - Use **AWS SSM Parameter Store** for secret management.  
 - Multi-region **DynamoDB replication**.  
 - Host frontend with **CloudFront + Route 53**.  
