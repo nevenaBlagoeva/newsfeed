@@ -159,7 +159,7 @@ function renderNews(news){
         return `<div class="news-item">
             <div class="news-badges">
                 <span class="badge source-badge" onclick="filterBySource('${item.source}')">${item.source}</span>
-                <span class="badge relevance-badge">Relevance: ${relevanceOutOf10}/10</span>
+                <span class="badge relevance-badge">Relevance score: ${relevanceScore}</span>
             </div>
             <h2 class="news-title">${escapeHtml(item.title)}</h2>
             <div class="news-footer">

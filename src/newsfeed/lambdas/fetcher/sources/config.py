@@ -8,7 +8,7 @@ SOURCES = [
         "class": RedditFetcher,
         "config": {
             "subreddit": "technology",
-            "limit": 5
+            "limit": 20
         }
     },
     {
@@ -16,7 +16,15 @@ SOURCES = [
         "class": RedditFetcher,
         "config": {
             "subreddit": "programming",
-            "limit": 5
+            "limit": 20
+        }
+    },
+        {
+        "name": "reddit_managers", 
+        "class": RedditFetcher,
+        "config": {
+            "subreddit": "managers",
+            "limit": 20
         }
     },
     {

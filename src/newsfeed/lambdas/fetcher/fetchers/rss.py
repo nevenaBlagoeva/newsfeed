@@ -21,7 +21,7 @@ class RSSFetcher(BaseFetcher):
             feed = feedparser.parse(response.content)
 
             events = []
-            for entry in feed.entries[:50]:
+            for entry in feed.entries[:200]:
                 matches = re.findall(r'href="([^"]+)"', entry.summary)
                 if matches:
                     url = matches[0]
