@@ -128,7 +128,7 @@ The final threshold selected was 0.35 - a loose but reliable filter.
 - Uses **OpenAI API** for semantic classification.  
 - Example: recognizes *“Teams service disruption”* as an outage.  
 - Deterministic mode (`temperature=0`) and caching ensure stable results.  
-- Disabled by default due to cost/latency, but included as an **experimental enhancement**.  
+- Disabled by default due to cost/latency and time limitations to deploy properly in AWS, but included as an **experimental enhancement**.  
 
 
 ## 🔹 Testing Strategy
